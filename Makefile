@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall -g -O2
 LDLIBS=
 
-all: test test-format test-rand
+all: test
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<

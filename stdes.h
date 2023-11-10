@@ -10,10 +10,10 @@
  *  - un buffer circulaire (via buff_first lect_end)
  *  - un buffer d'écriture normal
  */
-struct _ES_FICHIER {
+struct _IOBUF_FILE {
     int file_desc;
     char mode; // 'R' ou 'W'
-    void* buf;
+    char buf[BUFFER_SIZE];
     int buf_first;
     int buf_end;
 };

@@ -1,10 +1,27 @@
 #include <stdlib.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 #include "stdes.h"
-
 
 /* mode: 'R' = lecture, 'W' = écriture */
 IOBUF_FILE *iobuf_open(const char *nom, char mode) {
-    return NULL;
+    if (mode != 'R' && mode != 'W') return NULL;
+
+    // open file
+    int flags = (mode == 'R') ? O_RDONLY : O_CREAT | O_WRONLY;
+    int res = open(nom, flags);
+    if (!res) return NULL;
+
+    // allocation structure
+    IOBUF_FILE *f = malloc(sizeof(IOBUF_FILE));
+
+    // initialisation
+    f->file_desc = res;
+    f->mode = mode;
+    f->buf_first = 0;
+    f->buf_end = 0;
+
+    return f;
 }
 
 int iobuf_close(IOBUF_FILE *f) {

@@ -10,10 +10,11 @@ IOBUF_FILE *iobuf_open(const char *nom, char mode) {
     // open file
     int flags = (mode == 'R') ? O_RDONLY : O_CREAT | O_WRONLY;
     int res = open(nom, flags);
-    if (!res) return NULL;
+    if (res < 0) return NULL;
 
     // allocation structure
-    IOBUF_FILE *f = malloc(sizeof(IOBUF_FILE));
+    IOBUF_FILE *f = mmap(NULL, sizeof(IOBUF_FILE), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
+    if (f == MAP_FAILED) return NULL;
 
     // initialisation
     f->file_desc = res;

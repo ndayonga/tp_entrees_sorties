@@ -19,8 +19,7 @@ IOBUF_FILE *iobuf_open(const char *nom, char mode) {
     // initialisation
     f->file_desc = res;
     f->mode = mode;
-    f->buf_first = 0;
-    f->buf_end = 0;
+    f->buf_size = 0;
 
     return f;
 }
@@ -31,7 +30,7 @@ int iobuf_close(IOBUF_FILE *f) {
 
 
 int iobuf_read(void *p, unsigned int taille, unsigned int nbelem, IOBUF_FILE *f) {
-    return 0;
+    
 }
 
 

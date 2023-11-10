@@ -14,8 +14,7 @@ struct _IOBUF_FILE {
     int file_desc;
     char mode; // 'R' ou 'W'
     char buf[BUFFER_SIZE];
-    int buf_first;
-    int buf_end;
+    int buf_size;
 };
 
 typedef struct _IOBUF_FILE IOBUF_FILE;
@@ -36,4 +35,3 @@ int iobuf_printf(const char *format, ...);
 int iobuf_fscanf(IOBUF_FILE *f, const char *format, ...);
 
 #endif
-

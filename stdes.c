@@ -62,7 +62,7 @@ int iobuf_write(const void *p, unsigned int taille, unsigned int nbelem, IOBUF_F
     else{
         int size_written = 0;    // Taille de ce qui a été écrit dans le buffer système
         int n_elem_restant = nbelem;
-        int n_elem_buf = (BUFFER_SIZE - f->buf_pos)/taille;    
+        int n_elem_buf;    
         while(taille*n_elem_restant > (BUFFER_SIZE - f->buf_pos)){
             n_elem_buf = (BUFFER_SIZE - f->buf_pos)/taille;      // Nombre d'éléments qui pourront être écrit dans le buffer
             ecrire_buffer_systeme(&f, p+size_written, taille*n_elem_buf);

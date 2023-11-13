@@ -15,6 +15,7 @@ struct _IOBUF_FILE {
     char mode; // 'R' ou 'W'
     char buf[BUFFER_SIZE];
     int buf_size;
+    int buf_pos;
 };
 
 typedef struct _IOBUF_FILE IOBUF_FILE;

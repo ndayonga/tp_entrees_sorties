@@ -1,7 +1,7 @@
-#include "stdes.h"
 #include <stdlib.h>
 #include <sys/time.h>
 #include <assert.h>
+#include "stdes.h"
 
 #define MEMORY_SIZE 1280000 /* 1,3 Mo */
 
@@ -23,12 +23,12 @@ void init_mem(void)
 
 #define RAND_NUM 1 + rand () % 128 + 100 * (rand () % 3) + (4000 * ((rand () % 4)/4) * (rand() & 1))
 
-void mem_write (FICHIER* f)
+void mem_write (IOBUF_FILE * f)
 {
   int count = 0;
   int num;
   int lr;
-  ecriref ("Writing file...\n");
+  iobuf_printf("Writing file...\n");
 
   while (count < MEMORY_SIZE) {
     num = RAND_NUM ;
@@ -37,81 +37,81 @@ void mem_write (FICHIER* f)
       num = MEMORY_SIZE - count;
 
 #ifdef DEBUG
-    ecriref ("Writting % 8d / % 8d octets\n", num, count);
+    iobuf_printf ("Writting % 8d / % 8d octets\n", num, count);
 #endif
 
-    lr = ecrire (MEMORY + count, 1, num, f);
+    lr = iobuf_write (MEMORY + count, 1, num, f);
 #ifdef DEBUG
     if (lr != num)
-      ecriref (" -- Wrote only %d octets\n", lr);
+      iobuf_printf (" -- Wrote only %d octets\n", lr);
 #endif
     count += lr;
   }
-  ecriref ("Done\n");
+  iobuf_printf ("Done\n");
   vider (stdout);
 }
 
-void mem_read (FICHIER* f, char* buff)
+void mem_read (IOBUF_FILE* f, char* buff)
 {
   int count = 0;
   int num;
   int lr;
-  ecriref ("Reading file...\n");
+  iobuf_printf ("Reading file...\n");
   do {
     num = RAND_NUM ;
 #ifdef DEBUG
-    ecriref ("Reading  % 8d \\ % 8d octets\n", num, count);
+    iobuf_printf ("Reading  % 8d \\ % 8d octets\n", num, count);
 #endif
-    lr = lire (buff, 1, num, f);
+    lr = iobuf_read (buff, 1, num, f);
 #ifdef DEBUG
     if (lr != num)
-      ecriref (" -- Read only %d octets\n", lr);
+      iobuf_printf (" -- Read only %d octets\n", lr);
 #endif
     buff += lr;
     count += lr;
     assert (count <= MEMORY_SIZE);
   } while (lr);
-  ecriref ("Done\n");
+  iobuf_printf ("Done\n");
   vider (stdout);
 }
 
 void mem_compare (char* ref, char *buff)
 {
   int i;
-  ecriref ("Comparing memories...\n");
+  iobuf_printf ("Comparing memories...\n");
   for (i=0; i<MEMORY_SIZE; i++) {
     if (ref[i] != buff[i]) {
-      fecriref(stderr, "ERROR %c != %c at index %d\n", 
+      iobuf_fprintf(stderr, "ERROR %c != %c at index %d\n", 
           ref[i], buff[i], i);
     }
   }
-  ecriref ("Done\n");
+  iobuf_printf ("Done\n");
   vider (stdout);
 }
 
 
 int main(int argc, char *argv[])
 {
-  FICHIER *f;
+  IOBUF_FILE *f;
   char* filename = "rand-file.txt";
 
   init_mem ();
 
-  f = ouvrir (filename, 'E');
+  f = iobuf_open (filename, 'E');
   if (f == NULL)
     exit (-1);
   mem_write (f);
-  fermer (f);
+  iobuf_close (f);
 
   {
     char *buffer = malloc (sizeof(char) * MEMORY_SIZE);
-    f = ouvrir (filename, 'L');
+    f = iobuf_open (filename, 'L');
     if (f == NULL)
       exit (-1);
     mem_read (f, buffer);
     mem_compare (MEMORY, buffer);
     free (buffer);
-    fermer (f);
+    iobuf_close (f);
   }
 
   return 0;

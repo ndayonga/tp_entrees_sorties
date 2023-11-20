@@ -101,7 +101,8 @@ int iobuf_read(void *p, unsigned int taille, unsigned int nbelem, IOBUF_FILE *f)
         
         // on remet le curseur du fichier au bon endroit (si besoin est)
         if (i < nboctets_eltincomplet) {
-            lseek(f->file_desc, -(nboctets_eltincomplet-i), SEEK_CUR);
+            int s = lseek(f->file_desc, 0, SEEK_CUR) - nboctets_eltincomplet + i;
+            lseek(f->file_desc, s, SEEK_SET);
         }
     }
     
@@ -140,10 +141,7 @@ int iobuf_write(const void *p, unsigned int taille, unsigned int nbelem, IOBUF_F
         while (taille*n_elem_restant > BUFFER_SIZE - f->buf_size) {
             n_elem_buf = (BUFFER_SIZE - f->buf_size) / taille;
             ecrire_buffer_systeme(f, p+size_written, taille*n_elem_buf);
-            if (iobuf_flush(f) < 0) {
-                // ON FAIT QUOII ???
-                return -1; // A CHANGER
-            }
+            if (iobuf_flush(f) < 0) return nbelem - n_elem_restant;
             size_written += taille*n_elem_buf;
             n_elem_restant -= n_elem_buf;
         }
@@ -154,7 +152,7 @@ int iobuf_write(const void *p, unsigned int taille, unsigned int nbelem, IOBUF_F
             size_written += taille*n_elem_buf;
         }
 
-        return (nbelem - n_elem_restant);
+        return nbelem;
     }
 }
 

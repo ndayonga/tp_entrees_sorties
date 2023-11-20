@@ -37,7 +37,7 @@ void mem_write (IOBUF_FILE * f)
       num = MEMORY_SIZE - count;
 
 #ifdef DEBUG
-    iobuf_printf ("Writting % 8d / % 8d octets\n", num, count);
+    iobuf_printf ("Writting %d / %d octets\n", num, count);
 #endif
 
     lr = iobuf_write (MEMORY + count, 1, num, f);
@@ -48,7 +48,7 @@ void mem_write (IOBUF_FILE * f)
     count += lr;
   }
   iobuf_printf ("Done\n");
-  vider (stdout);
+  iobuf_flush (stdout);
 }
 
 void mem_read (IOBUF_FILE* f, char* buff)
@@ -60,7 +60,7 @@ void mem_read (IOBUF_FILE* f, char* buff)
   do {
     num = RAND_NUM ;
 #ifdef DEBUG
-    iobuf_printf ("Reading  % 8d \\ % 8d octets\n", num, count);
+    iobuf_printf ("Reading %d \\ %d octets\n", num, count);
 #endif
     lr = iobuf_read (buff, 1, num, f);
 #ifdef DEBUG
@@ -72,7 +72,7 @@ void mem_read (IOBUF_FILE* f, char* buff)
     assert (count <= MEMORY_SIZE);
   } while (lr);
   iobuf_printf ("Done\n");
-  vider (stdout);
+  iobuf_flush (stdout);
 }
 
 void mem_compare (char* ref, char *buff)
@@ -85,8 +85,8 @@ void mem_compare (char* ref, char *buff)
           ref[i], buff[i], i);
     }
   }
-  iobuf_printf ("Done\n");
-  vider (stdout);
+  iobuf_printf("Done\n");
+  iobuf_flush(stdout);
 }
 
 

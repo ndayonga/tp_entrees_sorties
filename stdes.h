@@ -6,10 +6,10 @@
 /**
  * un fichier est composé de :
  *  - un descripteur de fichier
- *  - un mode : lecture ou ecriture
- *  - un buffer
- *  - la taille du buffer
- *  - la position où lire / écrire
+ *  - un mode : lecture ou ecriture ('R' ou 'W' uniquement)
+ *  - un buffer (de BUFFER_SIZE octets)
+ *  - la taille effective du buffer (<= BUFFER_SIZE)
+ *  - la position où lire (uniquement)
  */
 struct _IOBUF_FILE {
     int file_desc;
@@ -24,7 +24,7 @@ typedef struct _IOBUF_FILE IOBUF_FILE;
 extern IOBUF_FILE *stdout;
 extern IOBUF_FILE *stderr;
 
-/* mode: 'L' = lecture, 'E' = écriture */
+/* mode: 'R' = lecture, 'W' = écriture */
 IOBUF_FILE *iobuf_open(const char *nom, char mode);
 int iobuf_close(IOBUF_FILE *f);
 int iobuf_read(void *p, unsigned int taille, unsigned int nbelem, IOBUF_FILE *f);

@@ -10,11 +10,11 @@ int main(int argc, char *argv[])
     if (argc != 3)
         exit(-1);
 
-    f1 = iobuf_open(argv[1], 'L');
+    f1 = iobuf_open(argv[1], 'R');
     if (f1 == NULL)
         exit(-1);
 
-    f2 = iobuf_open(argv[2], 'E');
+    f2 = iobuf_open(argv[2], 'W');
     if (f2 == NULL)
         exit(-1);
 
@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
         iobuf_write(&c, 1, 1, stdout);
         iobuf_write(&c, 1, 1, f2);
     }
+    iobuf_flush(stdout);
 
     iobuf_close(f1);
     iobuf_close(f2);

@@ -6,6 +6,33 @@
 #include "stdes.h"
 
 
+/* Entree et sorties standards */
+IOBUF_FILE _stdin = {
+    .file_desc = 0, .mode = 'R',
+    .buf_pos = 0, .buf_size = 0
+};
+
+IOBUF_FILE _stdout = {
+    .file_desc = 1, .mode = 'W',
+    .buf_pos = 0, .buf_size = 0
+};
+
+IOBUF_FILE _stderr = {
+    .file_desc = 2, .mode = 'W', 
+    .buf_pos = 0, .buf_size = 0
+};
+
+
+IOBUF_FILE *stdin = &_stdin;
+IOBUF_FILE *stdout = &_stdout;
+IOBUF_FILE *stderr = &_stderr;
+
+
+
+
+/* Fonctions */
+
+
 /* Ouvrir un fichier */
 /* mode: 'R' = lecture, 'W' = écriture */
 IOBUF_FILE *iobuf_open(const char *nom, char mode) {
@@ -114,7 +141,7 @@ int iobuf_write(const void *p, unsigned int taille, unsigned int nbelem, IOBUF_F
             n_elem_buf = (BUFFER_SIZE - f->buf_size) / taille;
             ecrire_buffer_systeme(f, p+size_written, taille*n_elem_buf);
             if (iobuf_flush(f) < 0) {
-                // ON RETOURNE QUOI ???
+                // ON FAIT QUOII ???
                 return -1; // A CHANGER
             }
             size_written += taille*n_elem_buf;
@@ -150,11 +177,10 @@ int iobuf_flush(IOBUF_FILE *f) {
 }
 
 
-int iobuf_fprintf(IOBUF_FILE *f, const char *format, ...) {
+int iobuf_vprintf(IOBUF_FILE *f, const char *format, va_list args) {
     if (f->mode != 'W') return -1;
 
-    va_list args;
-    va_start(args, format);
+    int caractere_ecris = 0;
 
     // fwrite octet par octet
     int i = 0;
@@ -163,7 +189,7 @@ int iobuf_fprintf(IOBUF_FILE *f, const char *format, ...) {
             char type = format[i+1];
             if (type == 'c') {
                 char c = (char)va_arg(args, int);
-                iobuf_write(&c, 1, 1, f);
+                caractere_ecris += iobuf_write(&c, 1, 1, f);
             }
             else if (type == 'd') {
                 int d = va_arg(args, int);
@@ -172,7 +198,7 @@ int iobuf_fprintf(IOBUF_FILE *f, const char *format, ...) {
                 // si d négatif
                 if (d < 0) {
                     c = '-';
-                    iobuf_write(&c, 1, 1, f);
+                    caractere_ecris += iobuf_write(&c, 1, 1, f);
                     d = -d;
                 }
 
@@ -184,7 +210,7 @@ int iobuf_fprintf(IOBUF_FILE *f, const char *format, ...) {
                 do {
                     if (puissance != 1) puissance /= 10;
                     c = (char) (d / puissance + ((int)'0'));
-                    iobuf_write(&c, 1, 1, f);
+                    caractere_ecris += iobuf_write(&c, 1, 1, f);
                     d = d % puissance;
                 } while (puissance != 1);
             }
@@ -195,26 +221,38 @@ int iobuf_fprintf(IOBUF_FILE *f, const char *format, ...) {
                 unsigned int len = 0;
                 while (s[len] != 0) len++;
 
-                iobuf_write(s, 1, len, f);
+                caractere_ecris += iobuf_write(s, 1, len, f);
             }
             else {
-                iobuf_write(&format[i], 1, 1, f);
+                caractere_ecris += iobuf_write(&format[i], 1, 1, f);
                 i--;
             }
             i++;
         }
         else {
-            iobuf_write(&format[i], 1, 1, f);
+            caractere_ecris += iobuf_write(&format[i], 1, 1, f);
         }
         i++;
     }
-    
-    return 0;
+
+    return caractere_ecris;
+}
+
+int iobuf_fprintf(IOBUF_FILE *f, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    int ret = iobuf_vprintf(f, format, args);
+    va_end(args);
+    return ret;
 }
 
 /* directly in stdout */
 int iobuf_printf(const char *format, ...) {
-    return iobuf_fprintf(stdout, format);
+    va_list args;
+    va_start(args, format);
+    int ret = iobuf_vprintf(stdout, format, args);
+    va_end(args);
+    return ret;
 }
 
 int iobuf_fscanf(IOBUF_FILE *f, const char *format, ...) {

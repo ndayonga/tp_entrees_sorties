@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
   init_mem ();
 
-  f = iobuf_open (filename, 'E');
+  f = iobuf_open (filename, 'W');
   if (f == NULL)
     exit (-1);
   mem_write (f);
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
   {
     char *buffer = malloc (sizeof(char) * MEMORY_SIZE);
-    f = iobuf_open (filename, 'L');
+    f = iobuf_open (filename, 'R');
     if (f == NULL)
       exit (-1);
     mem_read (f, buffer);

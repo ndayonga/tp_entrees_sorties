@@ -8,8 +8,6 @@ PROG=eval-write eval-read
 
 all: $(PROG) $(TEST)
 
-eval-all: $(PROG)
-	echo "OK"
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<

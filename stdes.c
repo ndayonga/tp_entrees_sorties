@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <math.h>    // for %f in fprintf
 #include "stdes.h"
 
 
@@ -165,7 +166,7 @@ int iobuf_write(const void *p, unsigned int taille, unsigned int nbelem, IOBUF_F
 
 /* Forcer les ecritures sur disque */
 int iobuf_flush(IOBUF_FILE *f) {
-    if (f == NULL) return -1;
+    if (f->mode != 'W') return 0;
     if (f->buf_size > 0) {
         int res = write(f->file_desc, f->buf, f->buf_size);
         if(res < 0) return -1;
@@ -205,7 +206,7 @@ int iobuf_vprintf(IOBUF_FILE *f, const char *format, va_list args) {
                     caractere_ecris += iobuf_write(&c, 1, 1, f);
                     d = -d;
                 }
-
+                
                 // puissance de 10 majorant d
                 unsigned int puissance = 1;
                 while (puissance <= d) puissance *= 10;
@@ -226,6 +227,42 @@ int iobuf_vprintf(IOBUF_FILE *f, const char *format, va_list args) {
                 while (s[len] != 0) len++;
 
                 caractere_ecris += iobuf_write(s, 1, len, f);
+            }
+            else if (type == 'f') {
+                double d = va_arg(args, double);
+                char c;
+
+                // si d négatif
+                if (d < 0) {
+                    c = '-';
+                    caractere_ecris += iobuf_write(&c, 1, 1, f);
+                    d = -d;
+                }
+
+                // puissance de 10 majorant d
+                double puissance = 1;
+                while (puissance <= d) puissance *= 10;
+
+                if (puissance == 1) {
+                    char *c2 = "0.";
+                    caractere_ecris += iobuf_write(c2, 1, 2, f);
+                }
+
+                // d chiffre par chiffre
+                do {
+                    puissance /= 10;
+                    int chiffre = (int)floor(d / puissance);
+                    c = (char)(chiffre + '0');
+                    caractere_ecris += iobuf_write(&c, 1, 1, f);
+
+                    d = (d / puissance - chiffre) * puissance;
+
+                    if (puissance == 1) {
+                        c = '.';
+                        caractere_ecris += iobuf_write(&c, 1, 1, f);
+                    }
+
+                } while (puissance > 1e-5);
             }
             else {
                 caractere_ecris += iobuf_write(&format[i], 1, 1, f);
@@ -283,7 +320,7 @@ int iobuf_fscanf(IOBUF_FILE *f, const char *format, ...) {
                 int k = 0;
                 char temp;
 
-                while (iobuf_read(&temp, sizeof(char), 1, f) == 1 && temp != ' ' && temp != '\0') {
+                while (iobuf_read(&temp, sizeof(char), 1, f) == 1 && temp != ' ' && temp != '\0' && temp != '\n') {
                     if (chaine) chaine[k] = temp;
                     k++;
                 }
@@ -301,7 +338,7 @@ int iobuf_fscanf(IOBUF_FILE *f, const char *format, ...) {
                 else *entier = 0;
 
                 int k = 0;
-                while (iobuf_read(&temp, sizeof(char), 1, f) == 1 && temp != ' ' && temp != '\0') {
+                while (iobuf_read(&temp, sizeof(char), 1, f) == 1 && temp != ' ' && temp != '\0' && temp != '\n') {
                     *entier = (*entier) * 10 + (int)(temp - '0');
                     k++;
                 }

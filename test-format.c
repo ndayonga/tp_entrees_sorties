@@ -17,11 +17,6 @@ int main (int argc, char **argv)
   for (n=-11;n<11;n++)
     iobuf_fprintf(f1, "%d ", n);
   iobuf_fprintf (f1, "\n", n);
-
-#if 0
-  /* Error, as expected: */
-  fecriref (f1, "Num: '%e'\n");
-#endif
   
   iobuf_close (f1);
 
@@ -37,5 +32,6 @@ int main (int argc, char **argv)
 
     iobuf_close (f2);
   }
+  
   return 0;
 }

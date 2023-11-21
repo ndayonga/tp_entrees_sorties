@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall -g -O1
 LDLIBS=
 
-TEST=test test-simple test-rand test-format
+TEST=test test-simple test-rand test-format test-durtyread
 PROG=$(TEST) eval-libc eval-syscall
 
 

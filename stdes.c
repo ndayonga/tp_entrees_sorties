@@ -230,6 +230,7 @@ int iobuf_vprintf(IOBUF_FILE *f, const char *format, va_list args) {
         else {
             caractere_ecris += iobuf_write(&format[i], 1, 1, f);
         }
+
         i++;
     }
 
@@ -254,71 +255,65 @@ int iobuf_printf(const char *format, ...) {
 }
 
 int iobuf_fscanf(IOBUF_FILE *f, const char *format, ...) {
-    if (f == NULL || format == NULL) return -1;
+    if (f->mode != 'R') return -1;
 
     char c;
-
-    char* car;
-    char* chaine;
-    int* entier;
 
     int nombre_arguments_lus = 0;
 
     va_list parametres;
-
     va_start(parametres, *format);
 
     int i = 0;
-    while(format[i] != '\0'){
-        while (format[i] == ' ') i++;
-        if(format[i] != '%'){
-            va_end(parametres);
-            return nombre_arguments_lus;
-        } 
-        else{
-            i++;
-            c = format[i];
-            switch(c){
-                case 'c':{
-                    char car_apres;
-                    car = va_arg(parametres, char*);
-                    nombre_arguments_lus += iobuf_read(car, sizeof(char), 1, f);
-                    // Apres le caractère, il doit y avoir un espace ou '\0
-                    if (iobuf_read(&car_apres, sizeof(char), 1, f) == 1 && car_apres != ' '){
-                        nombre_arguments_lus -= 1;
-                        va_end(parametres);
-                        return nombre_arguments_lus;
-                    }
-                    break;
-                }
-
-                case 's':{
-                    chaine = va_arg(parametres, char*);
-                    int k = 0;
-                    char temp;
-
-                    while (iobuf_read(&temp, sizeof(char), 1, f) == 1 && temp != ' ' && temp != '\0') {
-                        chaine[k] = temp;
-                        k++;
-                    }
-                    // ..................
-                    nombre_arguments_lus += 1;
-                    break;
-                }
-                
-                case 'd' :
-                    entier = va_arg(parametres, int*);
-                    nombre_arguments_lus += iobuf_read(entier, sizeof(int), 1, f);
-                    break;
-                
-                default :
-                    va_end(parametres);
-                    return nombre_arguments_lus;
-                    break;
+    while (format[i] != '\0') {
+        if (format[i] == '%') {
+            c = format[++i];
+            if (c == 'c') {
+                char *car = va_arg(parametres, char*);
+                nombre_arguments_lus += iobuf_read(car, sizeof(char), 1, f);
             }
-            i++;
+            else if(c == 's') {
+                char *chaine = va_arg(parametres, char*);
+                int k = 0;
+                char temp;
+
+                while (iobuf_read(&temp, sizeof(char), 1, f) == 1 && temp != ' ' && temp != '\0') {
+                    if (chaine) chaine[k] = temp;
+                    k++;
+                }
+                chaine[k] = '\0';
+                if (format[i] != '\0') i++;
+
+                if (k != 0) nombre_arguments_lus++;
+            }
+            else if (c == 'd') {
+                int *entier = va_arg(parametres, int*);
+
+                char signe, temp; 
+                iobuf_read(&signe, sizeof(char), 1, f);
+                if (signe != '-') *entier = (int)(signe - '0');
+                else *entier = 0;
+
+                int k = 0;
+                while (iobuf_read(&temp, sizeof(char), 1, f) == 1 && temp != ' ' && temp != '\0') {
+                    *entier = (*entier) * 10 + (int)(temp - '0');
+                    k++;
+                }
+
+                if (signe == '-') *entier = -(*entier);
+                if (format[i] != '\0') i++;
+
+                nombre_arguments_lus++;
+            }
         }
+        else {
+            // on avance d'un caractère aussi dans le fichier
+            if (iobuf_read(&c, 1, 1, f) != 1) i--;
+        }
+
+        if (format[i] != '\0') i++;
     }
+
     va_end(parametres);
     return nombre_arguments_lus;
 }

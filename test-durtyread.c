@@ -1,5 +1,4 @@
 #include "stdes.h"
-#include <unistd.h>
 
 int main(int argc, char const *argv[])
 {
@@ -18,10 +17,6 @@ int main(int argc, char const *argv[])
 
     r = iobuf_read(buf, 3072, 3, f);
     iobuf_printf("nb elemt de 1024 octets lus : %d %c %c\n", r, buf[0], buf[r*3072-1]);
-
-    int s = lseek(f->file_desc, 0, SEEK_CUR);
-    iobuf_printf("seek : %d %d %d\n", s, f->buf_pos, f->buf_size);
-    
 
     r = iobuf_read(buf, 2856, 1, f);
     iobuf_printf("elt lu ? %d %c\n", r, buf[0]);

@@ -124,6 +124,12 @@ int iobuf_write(const void *p, unsigned int taille, unsigned int nbelem, IOBUF_F
 
     unsigned int taille_totale = taille * nbelem;
 
+    if (taille > BUFFER_SIZE){
+        if (iobuf_flush(f) < 0) return 0;
+        if (write(f->file_desc, f->buf, taille_totale) == taille_totale) return nbelem;
+        return -1;
+    }
+
     // si tout rentre dans le buffer
     if (f->buf_size + taille_totale <= BUFFER_SIZE) {
         ecrire_buffer_systeme(f, p, taille_totale);

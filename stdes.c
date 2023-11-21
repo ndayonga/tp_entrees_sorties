@@ -218,5 +218,71 @@ int iobuf_printf(const char *format, ...) {
 }
 
 int iobuf_fscanf(IOBUF_FILE *f, const char *format, ...) {
-    return 0;
+    if (f == NULL || format == NULL) return -1;
+
+    char c;
+
+    char* car;
+    char* chaine;
+    int* entier;
+
+    int nombre_arguments_lus = 0;
+
+    va_list parametres;
+
+    va_start(parametres, *format);
+
+    int i = 0;
+    while(format[i] != '\0'){
+        while (format[i] == ' ') i++;
+        if(format[i] != '%'){
+            va_end(parametres);
+            return nombre_arguments_lus;
+        } 
+        else{
+            i++;
+            c = format[i];
+            switch(c){
+                case 'c':{
+                    char car_apres;
+                    car = va_arg(parametres, char*);
+                    nombre_arguments_lus += iobuf_read(car, sizeof(char), 1, f);
+                    // Apres le caractère, il doit y avoir un espace ou '\0
+                    if (iobuf_read(&car_apres, sizeof(char), 1, f) == 1 && car_apres != ' '){
+                        nombre_arguments_lus -= 1;
+                        va_end(parametres);
+                        return nombre_arguments_lus;
+                    }
+                    break;
+                }
+
+                case 's':{
+                    chaine = va_arg(parametres, char*);
+                    int k = 0;
+                    char temp;
+
+                    while (iobuf_read(&temp, sizeof(char), 1, f) == 1 && temp != ' ' && temp != '\0') {
+                        chaine[k] = temp;
+                        k++;
+                    }
+                    // ..................
+                    nombre_arguments_lus += 1;
+                    break;
+                }
+                
+                case 'd' :
+                    entier = va_arg(parametres, int*);
+                    nombre_arguments_lus += iobuf_read(entier, sizeof(int), 1, f);
+                    break;
+                
+                default :
+                    va_end(parametres);
+                    return nombre_arguments_lus;
+                    break;
+            }
+            i++;
+        }
+    }
+    va_end(parametres);
+    return nombre_arguments_lus;
 }

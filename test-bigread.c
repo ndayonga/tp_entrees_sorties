@@ -1,12 +1,14 @@
 #include "stdes.h"
 
+char buf[9*BUFFER_SIZE];
+
 int main(int argc, char const *argv[])
 {
-    char buf[9*BUFFER_SIZE];
     int i;
     for (i = 0; i < 3*BUFFER_SIZE; i++) buf[i] = 'a';
     for (; i < 6*BUFFER_SIZE; i++) buf[i] = 'b';
-    for (; i < 8*BUFFER_SIZE; i++) buf[i] = 'c'; // oups !
+    for (; i < 8*BUFFER_SIZE; i++) buf[i] = 'c'; // oups :
+    // on s'arrête avant la fin du troisième element
 
     IOBUF_FILE *f = iobuf_open("totest.txt", 'W');
     int r = iobuf_write(buf, 1, 8*BUFFER_SIZE, f);

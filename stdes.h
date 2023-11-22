@@ -1,6 +1,8 @@
 #ifndef _STDES_H
 #define _STDES_H
 
+#include <stdarg.h>
+
 #define BUFFER_SIZE 1024
 
 /**
@@ -31,6 +33,7 @@ int iobuf_read(void *p, unsigned int taille, unsigned int nbelem, IOBUF_FILE *f)
 int iobuf_write(const void *p, unsigned int taille, unsigned int nbelem, IOBUF_FILE *f);
 int iobuf_flush(IOBUF_FILE *f);
 
+int iobuf_vprintf(IOBUF_FILE *f, const char *format, va_list args);
 int iobuf_fprintf(IOBUF_FILE *f, const char *format, ...);
 /* directly in stdout */
 int iobuf_printf(const char *format, ...);

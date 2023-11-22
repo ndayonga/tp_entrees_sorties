@@ -126,9 +126,9 @@ int iobuf_write(const void *p, unsigned int taille, unsigned int nbelem, IOBUF_F
 
     unsigned int taille_totale = taille * nbelem;
 
-    if (taille > BUFFER_SIZE){
+    if (taille > BUFFER_SIZE) {
         if (iobuf_flush(f) < 0) return 0;
-        if (write(f->file_desc, f->buf, taille_totale) == taille_totale) return nbelem;
+        if (write(f->file_desc, p, taille_totale) == taille_totale) return nbelem;
         return -1;
     }
 

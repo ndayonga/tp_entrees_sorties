@@ -60,6 +60,7 @@ IOBUF_FILE *iobuf_open(const char *nom, char mode) {
 int iobuf_close(IOBUF_FILE *f) {
     if (iobuf_flush(f) < 0) return -1;
     if (munmap(f, sizeof(IOBUF_FILE)) < 0) return -1;
+    if(close(f->file_desc) == -1) return -1;
     return 0;
 }
 

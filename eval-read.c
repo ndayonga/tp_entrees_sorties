@@ -1,22 +1,12 @@
-#include <sys/stat.h>
-#include <stdarg.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <time.h>
+#include "eval.c"
 
-#include "stdes.h"
-
-#define NB_LITTLE_ELT (1ULL << 22)
-#define NB_BIG_ELT (1 << 12)
 #define BIG_ELT_SIZE (3*BUFFER_SIZE)
-#define NB_RUN 5
 
 char temp[BUFFER_SIZE];
 char temp2[BIG_ELT_SIZE];
 
 double little_read_stdes() {
-    struct timespec begin, end;
-    clock_gettime(CLOCK_REALTIME, &begin);
+    fct_prologue();
 
     char c;
     IOBUF_FILE *f = iobuf_open("toread1", 'R');
@@ -26,15 +16,11 @@ double little_read_stdes() {
     }
     iobuf_close(f);
 
-    clock_gettime(CLOCK_REALTIME, &end);
-    long seconds = end.tv_sec - begin.tv_sec;
-    long nanoseconds = end.tv_nsec - begin.tv_nsec;
-    return seconds + nanoseconds * 1e-9;
+    return fct_epilogue();
 }
 
 double little_read_syscall() {
-    struct timespec begin, end;
-    clock_gettime(CLOCK_REALTIME, &begin);
+    fct_prologue();
 
     char c;
     int f = open("toread1", O_RDONLY);
@@ -44,15 +30,11 @@ double little_read_syscall() {
     }
     close(f);
 
-    clock_gettime(CLOCK_REALTIME, &end);
-    long seconds = end.tv_sec - begin.tv_sec;
-    long nanoseconds = end.tv_nsec - begin.tv_nsec;
-    return seconds + nanoseconds * 1e-9;
+    return fct_epilogue();
 }
 
 double big_read_stdes() {
-    struct timespec begin, end;
-    clock_gettime(CLOCK_REALTIME, &begin);
+    fct_prologue();
 
     IOBUF_FILE *f = iobuf_open("toread2", 'R');
     for (unsigned long i = 0; i < NB_BIG_ELT; i++) {
@@ -61,15 +43,11 @@ double big_read_stdes() {
     }
     iobuf_close(f);
 
-    clock_gettime(CLOCK_REALTIME, &end);
-    long seconds = end.tv_sec - begin.tv_sec;
-    long nanoseconds = end.tv_nsec - begin.tv_nsec;
-    return seconds + nanoseconds * 1e-9;
+    return fct_epilogue();
 }
 
 double big_read_syscall() {
-    struct timespec begin, end;
-    clock_gettime(CLOCK_REALTIME, &begin);
+    fct_prologue();
 
     int f = open("toread2", O_RDONLY);
     for (unsigned long i = 0; i < NB_BIG_ELT; i++) {
@@ -78,10 +56,7 @@ double big_read_syscall() {
     }
     close(f);
 
-    clock_gettime(CLOCK_REALTIME, &end);
-    long seconds = end.tv_sec - begin.tv_sec;
-    long nanoseconds = end.tv_nsec - begin.tv_nsec;
-    return seconds + nanoseconds * 1e-9;
+    return fct_epilogue();
 }
 
 int main(int argc, char const *argv[])
@@ -103,7 +78,7 @@ int main(int argc, char const *argv[])
     sum_time /= NB_RUN;
     
     iobuf_printf("======== TEST LITTLE READ =========\n");
-    iobuf_printf("STDES   : Average wall time : %f\n", sum_time);
+    iobuf_printf("STDES   : Average time : %f\n", sum_time);
 
     sum_time = 0;
     for (int i = 0; i < NB_RUN; i++) {
@@ -111,7 +86,7 @@ int main(int argc, char const *argv[])
     }
     sum_time /= NB_RUN;
 
-    iobuf_printf("SYSCALL : Average wall time : %f\n", sum_time);
+    iobuf_printf("SYSCALL : Average time : %f\n", sum_time);
 
 
     iobuf_flush(stdout);
@@ -133,7 +108,7 @@ int main(int argc, char const *argv[])
     sum_time /= NB_RUN;
     
     iobuf_printf("======== TEST BIG READ =========\n");
-    iobuf_printf("STDES   : Average wall time : %f\n", sum_time);
+    iobuf_printf("STDES   : Average time : %f\n", sum_time);
 
     sum_time = 0;
     for (int i = 0; i < NB_RUN; i++) {
@@ -141,7 +116,7 @@ int main(int argc, char const *argv[])
     }
     sum_time /= NB_RUN;
 
-    iobuf_printf("SYSCALL : Average wall time : %f\n", sum_time);
+    iobuf_printf("SYSCALL : Average time : %f\n", sum_time);
 
     iobuf_flush(stdout);
     return 0;

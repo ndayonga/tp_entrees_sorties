@@ -29,6 +29,11 @@ Test fourni random et comparaison
 ./test-rand
 ```
 
+Supprimer les fichiers temporaires et les bianires
+```
+make clean
+```
+
 ## Performances
 
 Test de rapidité de write et read sur deux exemples

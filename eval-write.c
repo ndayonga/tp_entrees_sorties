@@ -1,20 +1,11 @@
-#include <sys/stat.h>
-#include <stdarg.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <time.h>
-#include "stdes.h"
+#include "eval.c"
 
-#define NB_LITTLE_ELT (1ULL << 21)
-#define NB_BIG_ELT (1 << 13)
 #define BIG_ELT_SIZE 1012
-#define NB_RUN 5
 
 char temp[NB_BIG_ELT * BIG_ELT_SIZE];
 
 double little_write_stdes() {
-    struct timespec begin, end;
-    clock_gettime(CLOCK_REALTIME, &begin);
+    fct_prologue();
 
 
     IOBUF_FILE *f = iobuf_open("towrite1", 'W');
@@ -24,15 +15,11 @@ double little_write_stdes() {
     iobuf_close(f);
 
 
-    clock_gettime(CLOCK_REALTIME, &end);
-    long seconds = end.tv_sec - begin.tv_sec;
-    long nanoseconds = end.tv_nsec - begin.tv_nsec;
-    return seconds + nanoseconds * 1e-9;
+    return fct_epilogue();
 }
 
 double little_write_syscall() {
-    struct timespec begin, end;
-    clock_gettime(CLOCK_REALTIME, &begin);
+    fct_prologue();
 
     int f = open("towrite2", O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
     char c = '2';
@@ -40,16 +27,12 @@ double little_write_syscall() {
         write(f, &c, 1);
     close(f);
 
-    clock_gettime(CLOCK_REALTIME, &end);
-    long seconds = end.tv_sec - begin.tv_sec;
-    long nanoseconds = end.tv_nsec - begin.tv_nsec;
-    return seconds + nanoseconds * 1e-9;
+    return fct_epilogue();
 }
 
 
 double big_write_stdes() {
-    struct timespec begin, end;
-    clock_gettime(CLOCK_REALTIME, &begin);
+    fct_prologue();
 
     IOBUF_FILE *f = iobuf_open("towrite3", 'W');
     for (unsigned int i = 0; i < NB_BIG_ELT * BIG_ELT_SIZE; i++)
@@ -57,27 +40,19 @@ double big_write_stdes() {
     iobuf_write(temp, BIG_ELT_SIZE, NB_BIG_ELT, f);
     iobuf_close(f);
 
-    clock_gettime(CLOCK_REALTIME, &end);
-    long seconds = end.tv_sec - begin.tv_sec;
-    long nanoseconds = end.tv_nsec - begin.tv_nsec;
-    return seconds + nanoseconds * 1e-9;
+    return fct_epilogue();
 }
 
 double big_write_syscall() {
-    struct timespec begin, end;
-    clock_gettime(CLOCK_REALTIME, &begin);
+    fct_prologue();
 
     int f = open("towrite4", O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
-    char temp[NB_BIG_ELT * BIG_ELT_SIZE];
     for (unsigned int i = 0; i < NB_BIG_ELT * BIG_ELT_SIZE; i++)
         temp[i] = '4';
     write(f, temp, BIG_ELT_SIZE * NB_BIG_ELT);
     close(f);
 
-    clock_gettime(CLOCK_REALTIME, &end);
-    long seconds = end.tv_sec - begin.tv_sec;
-    long nanoseconds = end.tv_nsec - begin.tv_nsec;
-    return seconds + nanoseconds * 1e-9;
+    return fct_epilogue();
 }
 
 
@@ -91,7 +66,7 @@ int main(int argc, char *argv[]) {
     sum_time /= NB_RUN;
     
     iobuf_printf("======== TEST LITTLE WRITE =========\n");
-    iobuf_printf("STDES   : Average wall time : %f\n", sum_time);
+    iobuf_printf("STDES   : Average time : %f\n", sum_time);
 
     sum_time = 0;
     for (int i = 0; i < NB_RUN; i++) {
@@ -99,7 +74,7 @@ int main(int argc, char *argv[]) {
     }
     sum_time /= NB_RUN;
 
-    iobuf_printf("SYSCALL : Average wall time : %f\n", sum_time);
+    iobuf_printf("SYSCALL : Average time : %f\n", sum_time);
     iobuf_flush(stdout);
 
 
@@ -112,7 +87,7 @@ int main(int argc, char *argv[]) {
     sum_time /= NB_RUN;
     
     iobuf_printf("======== TEST BIG WRITE =========\n");
-    iobuf_printf("STDES   : Average wall time : %f\n", sum_time);
+    iobuf_printf("STDES   : Average time : %f\n", sum_time);
 
     sum_time = 0;
     for (int i = 0; i < NB_RUN; i++) {
@@ -120,7 +95,7 @@ int main(int argc, char *argv[]) {
     }
     sum_time /= NB_RUN;
 
-    iobuf_printf("SYSCALL : Average wall time : %f\n", sum_time);
+    iobuf_printf("SYSCALL : Average time : %f\n", sum_time);
 
     iobuf_flush(stdout);
 

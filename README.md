@@ -8,13 +8,15 @@ Faire simplement `make`.
 
 Recopie de fichier :
 ```
-echo "Je suis un fichier de test\nAvec plusieurs lignes\n;)" > toto1
+echo $'Je suis un fichier de test\nAvec plusieurs lignes\n;)' > toto1
 ./test toto1 toto2
 ```
 
 Test simple et fourni de fprintf et fscanf
 ```
 ./test-simple toto3
+
+echo $'  test  a end lecture\nend 124 fin_lecture' > toformat.txt
 ./test-format totoecr toformat.txt
 ```
 

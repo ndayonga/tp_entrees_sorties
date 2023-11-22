@@ -32,6 +32,7 @@ int main (int argc, char **argv)
 
     iobuf_close (f2);
   }
-  
+
+  iobuf_flush(stdout);
   return 0;
 }

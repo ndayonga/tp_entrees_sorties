@@ -5,58 +5,42 @@
 char temp[BUFFER_SIZE];
 char temp2[BIG_ELT_SIZE];
 
-double little_read_stdes() {
-    fct_prologue();
-
+void little_read_stdes() {
     char c;
     IOBUF_FILE *f = iobuf_open("toread1", 'R');
     for (unsigned long i = 0; i < NB_LITTLE_ELT; i++) {
         int r = iobuf_read(&c, 1, 1, f);
-        if (r <= 0) return 56;
+        if (r <= 0) exit(54);
     }
     iobuf_close(f);
-
-    return fct_epilogue();
 }
 
-double little_read_syscall() {
-    fct_prologue();
-
+void little_read_syscall() {
     char c;
     int f = open("toread1", O_RDONLY);
     for (unsigned long i = 0; i < NB_LITTLE_ELT; i++) {
         int r = read(f, &c, 1);
-        if (r <= 0) return 56;
+        if (r <= 0) exit(55);
     }
     close(f);
-
-    return fct_epilogue();
 }
 
-double big_read_stdes() {
-    fct_prologue();
-
+void big_read_stdes() {
     IOBUF_FILE *f = iobuf_open("toread2", 'R');
     for (unsigned long i = 0; i < NB_BIG_ELT; i++) {
         int r = iobuf_read(temp2, 1, BIG_ELT_SIZE, f);
-        if (r < BIG_ELT_SIZE) return 56;
+        if (r < BIG_ELT_SIZE) exit(56);
     }
     iobuf_close(f);
-
-    return fct_epilogue();
 }
 
-double big_read_syscall() {
-    fct_prologue();
-
+void big_read_syscall() {
     int f = open("toread2", O_RDONLY);
     for (unsigned long i = 0; i < NB_BIG_ELT; i++) {
         int r = read(f, temp2, BIG_ELT_SIZE);
-        if (r < BIG_ELT_SIZE) return 56;
+        if (r < BIG_ELT_SIZE) exit(57);
     }
     close(f);
-
-    return fct_epilogue();
 }
 
 int main(int argc, char const *argv[])
@@ -71,24 +55,12 @@ int main(int argc, char const *argv[])
     close(f);
 
 
-    double sum_time = 0;
-    for (int i = 0; i < NB_RUN; i++) {
-        sum_time += little_read_stdes();
-    }
-    sum_time /= NB_RUN;
-    
+    double av_time = eval_test(little_read_stdes);
     iobuf_printf("======== TEST LITTLE READ =========\n");
-    iobuf_printf("STDES   : Average time : %f\n", sum_time);
+    iobuf_printf("STDES   : Average time : %f\n", av_time);
 
-    sum_time = 0;
-    for (int i = 0; i < NB_RUN; i++) {
-        sum_time += little_read_syscall();
-    }
-    sum_time /= NB_RUN;
-
-    iobuf_printf("SYSCALL : Average time : %f\n", sum_time);
-
-
+    av_time = eval_test(little_read_syscall);
+    iobuf_printf("SYSCALL : Average time : %f\n", av_time);
     iobuf_flush(stdout);
 
 
@@ -101,22 +73,12 @@ int main(int argc, char const *argv[])
         write(f, temp2, BIG_ELT_SIZE);
     close(f);
 
-    sum_time = 0;
-    for (int i = 0; i < NB_RUN; i++) {
-        sum_time += big_read_stdes();
-    }
-    sum_time /= NB_RUN;
-    
+    av_time = eval_test(big_read_stdes);    
     iobuf_printf("======== TEST BIG READ =========\n");
-    iobuf_printf("STDES   : Average time : %f\n", sum_time);
+    iobuf_printf("STDES   : Average time : %f\n", av_time);
 
-    sum_time = 0;
-    for (int i = 0; i < NB_RUN; i++) {
-        sum_time += big_read_syscall();
-    }
-    sum_time /= NB_RUN;
-
-    iobuf_printf("SYSCALL : Average time : %f\n", sum_time);
+    av_time = eval_test(big_read_syscall);
+    iobuf_printf("SYSCALL : Average time : %f\n", av_time);
 
     iobuf_flush(stdout);
     return 0;

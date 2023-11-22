@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <time.h>
+#include <stdlib.h>
 
 #include "stdes.h"
 
@@ -23,4 +24,15 @@ double fct_epilogue() {
     long seconds = end.tv_sec - begin.tv_sec;
     long nanoseconds = end.tv_nsec - begin.tv_nsec;
     return seconds + nanoseconds * 1e-9;
+}
+
+
+double eval_test(void fct(void)) {
+    double sum_time = 0;
+    for (unsigned int i = 0; i < NB_RUN; i++) {
+        fct_prologue();
+        fct();
+        sum_time += fct_epilogue();
+    }
+    return sum_time / NB_RUN;
 }

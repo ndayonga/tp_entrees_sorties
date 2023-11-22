@@ -1,0 +1,13 @@
+*.o
+
+eval-read
+eval-write
+test-bigread
+test-bigwrite
+test-format
+test-rand
+test-simple
+test
+
+to*
+.vscode/*
